@@ -11,11 +11,11 @@ defmodule Conform.Conf do
   preferred method for manipulating/querying the conf terms is via
   this module's API.
   """
-  @spec from_file(String.t) :: {:error, term} | {:ok, non_neg_integer() | atom()}
-  def from_file(path) when is_binary(path) do
+  @spec from_file(String.t, list) :: {:error, term} | {:ok, non_neg_integer() | atom()}
+  def from_file(path, conf_table_opts \\ []) when is_binary(path) do
     case Conform.Parse.file(path) do
       {:error, _} = err -> err
-      {:ok, parsed}     -> from(parsed)
+      {:ok, parsed}     -> from(parsed, conf_table_opts)
     end
   end
 
@@ -35,8 +35,8 @@ defmodule Conform.Conf do
   end
 
   @doc false
-  def from(conf) do
-    table = :ets.new(:conform_query, [:set, keypos: 1])
+  def from(conf, conf_table_opts \\ []) do
+    table = :ets.new(:conform_query, conf_table_opts ++ [:set, keypos: 1])
     for {key, value} <- conf do
       # In order to make sure that module names in key paths are not split,
       # get_key_path rejoins those parts, the result is the actual key we will
